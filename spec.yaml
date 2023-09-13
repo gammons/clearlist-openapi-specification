@@ -1,0 +1,48 @@
+openapi: 3.0.0
+info:
+  title: Clearlist.io API documentation
+  description: Clearlist.io is the ultimate solution for email list cleaning.
+  contact:
+    name: API Support
+    email: hello@clearlist.io
+  version: 0.0.1
+
+servers:
+- url: https://api.clearlist.io
+
+components:
+  securitySchemes:
+    clearlist_auth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: The user's bearer token sent via an Authorization header
+
+paths:
+  /me:
+    get:
+      summary: Get information about the logged in user
+      description: Shows all information about the currently logged in user.
+      security:
+        - clearlist_auth: []
+      responses:
+        "200":
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  email:
+                    type: string
+                    description: Email address of the user
+        "401":
+          description: User could not be found via token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Gives information about what went wrong with the request.
