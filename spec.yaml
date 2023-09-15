@@ -113,20 +113,79 @@ components:
           type: string
           description: Any additional messages about the email verification
         email_state:
-          type: integer
+          type: string
           enum:
-            - 0
-            - 1
-            - 2
-            - 3
-            - 4
-          description: A simple state that shows the verification result. 0 = ok, 1 = email is invalid, 2 = email is deliverable but risky, 3 = unknown, 4 = accept all.
+            - ok
+            - email_invalid
+            - risky
+            - unknown
+            - accept_all
+          description: A simple state that shows the verification result.
         account:
           type: object
           properties:
             credits:
               type: integer
               description: The number of credits remaining in the account.
+
+    batch:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: "The UUID of the batch"
+        batch_state:
+          type: string
+          enum:
+            - pending
+            - pending_processing
+            - processing
+            - completed
+          description: The state of the batch verification process
+        batch_type:
+          type: string
+          enum:
+            - user_import
+              api_import
+              integration
+          description: Where the batch was created from
+        email_count:
+          type: integer
+          description: The count of emails in the batch.
+        processed_count:
+          type: integer
+          description: The number of emails that have gone through the verification process.
+        disposable_count:
+          type: integer
+          description: The number of disposable emails in the batch.
+        role_count:
+          type: integer
+          description: The number of role emails in the batch.
+        credits_used:
+          type: integer
+          description: The number of credits used to process the batch.
+        credits_saved:
+          type: integer
+          description: The number of credits saved when processing the batch, due to duplicates, invalid emails, or unknown / accept all addresses.
+        failed_syntax_check_count:
+          type: integer
+          description: The number of email addresses that failed the syntax checker.
+        failed_mx_check_count:
+          type: integer
+          description: The number of email addresses that failed the domain MX check.
+        failed_no_mailbox_count:
+          type: integer
+          description: The number of email addresses do not exist
+        ok_for_all_count:
+          type: integer
+          description: The number of email addresses that have a domain that accepts any email address.
+        ok_count:
+          type: integer
+          description: The number of email addresses are ok for delivery.
+        name:
+          type: string
+          description: The name of the batch.
 
 
   securitySchemes:
@@ -186,3 +245,37 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/email'
+
+  /api/v1/batches:
+    post:
+      tags:
+        - Email validation
+      summary: Verify a list of emails
+      requestBody:
+        required: true
+        description: this is the description
+        content:
+          application/octet-stream:
+            schema:
+              type: object
+              properties:
+                csv:
+                  type: string
+                  description: The CSV file to upload
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                emails:
+                  type: string
+                  description: a comma or space separated list of email addresses to validate
+
+      security:
+        - clearlist_auth: []
+      responses:
+        "200":
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/batch'
