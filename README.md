@@ -1,4 +1,6 @@
-# API docs
+# Clearlist API docs
+
+This repo contains the OpenAPI specification for the clearlist.io api.
 
 ## Validator tool
 
