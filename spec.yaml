@@ -11,6 +11,59 @@ servers:
 - url: https://api.clearlist.io
 
 components:
+  schemas:
+    api_key:
+      type: object
+      properties:
+        active:
+          type: boolean
+          description: Whether the api token is active or not
+        name:
+          type: string
+          description: The name of the api token
+        last_used_at:
+          type: string
+          format: date-time
+          description: The last time the api key was used
+        created_at:
+          type: string
+          format: date-time
+          description: When the API key was created
+
+    me:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          description: Email address of the user
+        name:
+          type: string
+          description: The full name of the user
+        uuid:
+          type: string
+          format: uuid
+          description: A unique identifier for the user
+        errors:
+          type: array
+          items:
+            type: string
+        last_login_at:
+          type: string
+          description: The last login date of the user
+          format: date-time
+        time_zone:
+          type: string
+          description: The time zone for the user
+        token:
+          type: string
+          description: The api token currently in use for the request
+        api_keys:
+          type: array
+          items:
+            $ref: '#/components/schemas/api_key'
+
+
   securitySchemes:
     clearlist_auth:
       type: apiKey
@@ -31,11 +84,8 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  email:
-                    type: string
-                    description: Email address of the user
+                $ref: '#/components/schemas/me'
+
         "401":
           description: User could not be found via token
           content:
