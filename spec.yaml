@@ -10,6 +10,12 @@ info:
 servers:
 - url: https://api.clearlist.io
 
+tags:
+  - name: Me
+    description: Everything about the user that is using the api
+  - name: Email validation
+    description: Endpoints used to validate email addresses
+
 components:
   schemas:
     api_key:
@@ -74,6 +80,8 @@ components:
 paths:
   /me:
     get:
+      tags:
+        - Me
       summary: Get information about the logged in user
       description: Shows all information about the currently logged in user.
       security:
