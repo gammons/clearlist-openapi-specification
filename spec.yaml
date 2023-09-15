@@ -69,6 +69,65 @@ components:
           items:
             $ref: '#/components/schemas/api_key'
 
+    email:
+      type: object
+      properties:
+        address:
+          type: string
+          format: email
+          description: The email address
+        ok:
+          type: boolean
+          description: Email is ok for delivery
+        risky:
+          type: boolean
+          description: Email is ok for delivery, but potentially risky to deliver to.
+        invalid:
+          type: boolean
+          description: Email is invalid and should not be delivered to.
+        accept_all:
+          type: boolean
+          description: Whether the email domain accepts all addresses
+        is_disposable:
+          type: boolean
+          description: Whether the email address is part of a disposable address domain
+        is_role:
+          type: boolean
+          description: Whether the email address is identified as a role address (e.g. postmaster@domain.com)
+        failed_mx_check:
+          type: boolean
+          description: The email domain failed the MX check.  It may not have an MX record.
+        failed_smtp_check:
+          type: boolean
+          description: The email address failed the SMTP check and emails cannot be delivered to it.  This may be because the email address is full, amongst other reasons.
+        failed_no_mailbox:
+          type: boolean
+          description: The email address does not exist on the domain
+        domain:
+          type: string
+          description: The email address domain
+        canonical:
+          type: string
+          description: The canonical part of the email address
+        messages:
+          type: string
+          description: Any additional messages about the email verification
+        email_state:
+          type: integer
+          enum:
+            - 0
+            - 1
+            - 2
+            - 3
+            - 4
+          description: A simple state that shows the verification result. 0 = ok, 1 = email is invalid, 2 = email is deliverable but risky, 3 = unknown, 4 = accept all.
+        account:
+          type: object
+          properties:
+            credits:
+              type: integer
+              description: The number of credits remaining in the account.
+
 
   securitySchemes:
     clearlist_auth:
@@ -104,3 +163,26 @@ paths:
                   error:
                     type: string
                     description: Gives information about what went wrong with the request.
+
+  /api/v1/verify_single_email:
+    post:
+      tags:
+        - Email validation
+      summary: Verify a single email
+      security:
+        - clearlist_auth: []
+      parameters:
+        - name: email
+          in: query
+          required: true
+          description: The email address to verify
+          schema:
+            type: string
+            format: email
+      responses:
+        "200":
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/email'
