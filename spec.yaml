@@ -14,7 +14,9 @@ tags:
   - name: Me
     description: Everything about the user that is using the api
   - name: Email validation
-    description: Endpoints used to validate email addresses
+    description: Endpoints used to validate a single email address
+  - name: Batch validation
+    description: Endpoints used to validate multiple email addresses
 
 components:
   schemas:
@@ -196,32 +198,6 @@ components:
       description: The user's bearer token sent via an Authorization header
 
 paths:
-  /me:
-    get:
-      tags:
-        - Me
-      summary: Get information about the logged in user
-      description: Shows all information about the currently logged in user.
-      security:
-        - clearlist_auth: []
-      responses:
-        "200":
-          description: A successful response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/me'
-
-        "401":
-          description: User could not be found via token
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    description: Gives information about what went wrong with the request.
 
   /api/v1/verify_single_email:
     post:
@@ -249,19 +225,31 @@ paths:
   /api/v1/batches:
     post:
       tags:
-        - Email validation
+        - Batch validation
       summary: Verify a list of emails
+      description: "Upload a list of emails to verify.  You can either of the following (but not both):\n
+        - a comma- or space-separated list via the `emails` parameter,\n
+        - A binary file upload via the `csv` parameter documented below.\n
+
+        Note that batches are processed in the background.  You should poll the status of your batch's progress by `GET`ing the batch you created by its uuid."
+      security:
+        - clearlist_auth: []
       requestBody:
         required: true
         description: this is the description
         content:
-          application/octet-stream:
+          multipart/form-data:
             schema:
               type: object
               properties:
                 csv:
                   type: string
+                  format: binary
                   description: The CSV file to upload
+                uuid:
+                  type: string
+                  format: uuid
+                  description: Supply a UUID if you want the batch to have this UUID.  Otherwise, a random UUID will be generated.
           application/x-www-form-urlencoded:
             schema:
               type: object
@@ -269,7 +257,32 @@ paths:
                 emails:
                   type: string
                   description: a comma or space separated list of email addresses to validate
+                uuid:
+                  type: string
+                  format: uuid
+                  description: Supply a UUID if you want the batch to have this UUID.  Otherwise, a random UUID will be generated.
 
+      responses:
+        "200":
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/batch'
+
+  /api/v1/batches/{uuid}:
+    get:
+      tags:
+        - Batch validation
+      summary: Retrieve a single batch
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          description: The UUID of the batch to get
+          schema:
+            type: string
+            format: uuid
       security:
         - clearlist_auth: []
       responses:
@@ -279,3 +292,51 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/batch'
+
+        "401":
+          description: User could not be found via token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Gives information about what went wrong with the request.
+        "404":
+          description: Batch could not be found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Gives information about what went wrong with the request.
+
+  /me:
+    get:
+      tags:
+        - Me
+      summary: Get information about the logged in user
+      description: Shows all information about the currently logged in user.
+      security:
+        - clearlist_auth: []
+      responses:
+        "200":
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/me'
+
+        "401":
+          description: User could not be found via token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Gives information about what went wrong with the request.
