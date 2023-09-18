@@ -14,12 +14,18 @@ tags:
   - name: Me
     description: Everything about the user that is using the api
   - name: Email validation
-    description: Endpoints used to validate a single email address
+    description: Endpoints used to validate a single email address.  Validation is faster but potentially less accurate.
   - name: Batch validation
-    description: Endpoints used to validate multiple email addresses
+    description: Endpoints used to validate multiple email addresses.  Validation can be slower but is the most accurate.
 
 components:
   schemas:
+    error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Gives information about what went wrong with the request.
     api_key:
       type: object
       properties:
@@ -269,6 +275,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/batch'
+        "422":
+          description: Insufficient credits to process batch
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        "401":
+          description: User could not be found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
 
   /api/v1/batches/{uuid}:
     get:
@@ -294,25 +312,17 @@ paths:
                 $ref: '#/components/schemas/batch'
 
         "401":
-          description: User could not be found via token
+          description: User could not be found
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    description: Gives information about what went wrong with the request.
+                $ref: '#/components/schemas/error'
         "404":
           description: Batch could not be found
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    description: Gives information about what went wrong with the request.
+                $ref: '#/components/schemas/error'
 
   /me:
     get:
