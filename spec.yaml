@@ -13,9 +13,11 @@ servers:
 tags:
   - name: Me
     description: Everything about the user that is using the api
-  - name: Email validation
+  - name: Inline email validation
     description: Endpoints used to validate a single email address.  Validation is faster but potentially less accurate.
-  - name: Batch validation
+  - name: Batch email validation
+    description: Endpoints used to validate multiple email addresses.  Validation can be slower but is the most accurate.
+  - name: Working with batches
     description: Endpoints used to validate multiple email addresses.  Validation can be slower but is the most accurate.
 
 components:
@@ -84,42 +86,15 @@ components:
           type: string
           format: email
           description: The email address
-        ok:
-          type: boolean
-          description: Email is ok for delivery
-        risky:
-          type: boolean
-          description: Email is ok for delivery, but potentially risky to deliver to.
-        invalid:
-          type: boolean
-          description: Email is invalid and should not be delivered to.
-        accept_all:
-          type: boolean
-          description: Whether the email domain accepts all addresses
-        is_disposable:
-          type: boolean
-          description: Whether the email address is part of a disposable address domain
-        is_role:
-          type: boolean
-          description: Whether the email address is identified as a role address (e.g. postmaster@domain.com)
-        failed_mx_check:
-          type: boolean
-          description: The email domain failed the MX check.  It may not have an MX record.
-        failed_smtp_check:
-          type: boolean
-          description: The email address failed the SMTP check and emails cannot be delivered to it.  This may be because the email address is full, amongst other reasons.
-        failed_no_mailbox:
-          type: boolean
-          description: The email address does not exist on the domain
         domain:
           type: string
           description: The email address domain
         canonical:
           type: string
-          description: The canonical part of the email address
-        messages:
+          description: The canonical (or local) part of the email address
+        mx_record:
           type: string
-          description: Any additional messages about the email verification
+          description: The the mx record that was found and used for validation
         email_state:
           type: string
           enum:
@@ -129,6 +104,20 @@ components:
             - unknown
             - accept_all
           description: A simple state that shows the verification result.
+        email_sub_state:
+          type: string
+          enum:
+            - email_ok
+            - accept_all
+            - is_disposable
+            - is_role
+            - failed_mx_check
+            - failed_smtp_check
+            - failed_spam_trap
+            - failed_no_mailbox
+            - failed_greylisted
+            - failed_syntax_check
+          description: More details about the email's validation status.
         account:
           type: object
           properties:
@@ -188,6 +177,9 @@ components:
         ok_for_all_count:
           type: integer
           description: The number of email addresses that have a domain that accepts any email address.
+        unknown_count:
+          type: integer
+          description: The number of email addresses that have an unknown status.
         ok_count:
           type: integer
           description: The number of email addresses are ok for delivery.
@@ -205,18 +197,23 @@ components:
 
 paths:
 
-  /api/v1/verify_single_email:
+  /api/v1/verify_inline:
     post:
       tags:
-        - Email validation
-      summary: Verify a single email
+        - Inline email validation
+      summary: Verify up to 10 email addresses.
+      description: Verify up to 10 email addresses.  Verification will happen inline during the api request.  Faster but potentially less accurate.
       security:
         - clearlist_auth: []
       parameters:
         - name: email
           in: query
           required: true
-          description: The email address to verify
+          description: A comma- or space-separated list of emails
+          examples:
+            one:
+              summary: A comma-separated list of emails
+              value: bob@example.com,jon@example.com,test@example.com
           schema:
             type: string
             format: email
@@ -227,11 +224,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/email'
+        "422":
+          description: Insufficient credits to process
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        "401":
+          description: User could not be found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
 
   /api/v1/batches:
     post:
       tags:
-        - Batch validation
+        - Batch email validation
       summary: Verify a list of emails
       description: "Upload a list of emails to verify.  You can either of the following (but not both):\n
         - a comma- or space-separated list via the `emails` parameter,\n
@@ -287,12 +296,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+    get:
+      tags:
+        - Working with batches
+      summary: Retrieve all batches for your account.
+      security:
+        - clearlist_auth: []
+      responses:
+        "200":
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/batch'
+        "401":
+          description: User could not be found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+
 
   /api/v1/batches/{uuid}:
     get:
       tags:
-        - Batch validation
-      summary: Retrieve a single batch
+        - Working with batches
+      summary: Retrieve a single batch by its UUID.
       parameters:
         - name: uuid
           in: path
@@ -310,6 +341,114 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/batch'
+
+        "401":
+          description: User could not be found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        "404":
+          description: Batch could not be found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+    delete:
+      tags:
+        - Batch validation
+      summary: Delete a batch by its UUID.
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          description: The UUID of the batch to get
+          schema:
+            type: string
+            format: uuid
+      security:
+        - clearlist_auth: []
+      responses:
+        "200":
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/batch'
+
+        "401":
+          description: User could not be found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        "404":
+          description: Batch could not be found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+
+  /api/v1/batches/{uuid}/download:
+    get:
+      tags:
+        - Working with batches
+      summary: Download CSV of a batch with an extra column that has the email validation results
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          description: The UUID of the batch to get
+          schema:
+            type: string
+            format: uuid
+      security:
+        - clearlist_auth: []
+      responses:
+        "200":
+          description: A successful response
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+
+        "401":
+          description: User could not be found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        "404":
+          description: Batch could not be found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+
+  /api/v1/batches/{uuid}/download_cleaned:
+    get:
+      tags:
+        - Working with batches
+      summary: Download CSV of a batch with the invalid emails removed
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          description: The UUID of the batch to get
+          schema:
+            type: string
+            format: uuid
+      security:
+        - clearlist_auth: []
+      responses:
+        "200":
+          description: A successful response
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
 
         "401":
           description: User could not be found
