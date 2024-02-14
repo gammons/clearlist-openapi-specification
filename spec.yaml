@@ -1,7 +1,13 @@
 openapi: 3.0.0
 info:
   title: TrueList.io API documentation
-  description: TrueList.io is the ultimate solution for email list cleaning.
+  description: >
+    Welcome to TrueList's api!  To get started, <a href='https://app.truelist.io/settings/api-keys'>generate an api key</a>. You'll use the API key in an `Authorization` header in every request.
+    <br />
+    <br />
+
+    An example: `Authorization: Bearer <your token here>`
+
   contact:
     name: API Support
     email: hello@truelist.io
