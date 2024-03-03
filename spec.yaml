@@ -186,7 +186,9 @@ components:
         name:
           type: string
           description: The name of the batch.
-
+        webhook_url:
+          type: string
+          description: Supply a webhook_url when creating a batch.  Truelist will call the url when the batch has completed.
 
   securitySchemes:
     truelist_auth:
@@ -246,7 +248,10 @@ paths:
         - a comma- or space-separated list via the `emails` parameter,\n
         - A binary file upload via the `csv` parameter documented below.\n
 
-        Note that batches are processed in the background.  You should poll the status of your batch's progress by `GET`ing the batch you created by its uuid."
+        Note that batches are processed in the background.  To check on the status of a list, you have a couple of options:
+        - Poll the status of your batch's progress by `GET`ing the batch you created by its uuid.\n
+        - Supply a `webhook_url` when creating the batch.  TrueList will call the url you supplied when the batch is completed.
+          "
       security:
         - truelist_auth: []
       requestBody:
