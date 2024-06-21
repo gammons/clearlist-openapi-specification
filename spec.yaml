@@ -19,7 +19,7 @@ servers:
 tags:
   - name: Me
     description: Everything about the user that is using the api
-  - name: Inline email validation
+  - name: Single email validation
     description: Endpoints used to validate a single email address.  Validation is faster but potentially less accurate.
   - name: Batch email validation
     description: Endpoints used to validate multiple email addresses.  Validation can be slower but is the most accurate.
@@ -202,8 +202,8 @@ paths:
   /api/v1/verify_inline:
     post:
       tags:
-        - Inline email validation
-      summary: Verify up to 10 email addresses.
+        - Single email validation
+      summary: Verify a single email address
       description: Verify up to 10 email addresses.  Verification will happen inline during the api request.  Faster but potentially less accurate.
       security:
         - truelist_auth: []
