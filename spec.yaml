@@ -159,12 +159,6 @@ components:
         role_count:
           type: integer
           description: The number of role emails in the batch.
-        credits_used:
-          type: integer
-          description: The number of credits used to process the batch.
-        credits_saved:
-          type: integer
-          description: The number of credits saved when processing the batch, due to duplicates, invalid emails, or unknown / accept all addresses.
         failed_syntax_check_count:
           type: integer
           description: The number of email addresses that failed the syntax checker.
@@ -189,6 +183,18 @@ components:
         webhook_url:
           type: string
           description: Supply a webhook_url when creating a batch.  Truelist will call the url when the batch has completed.
+        safest_bet_csv_url:
+          type: string
+          description: A url to download a csv of the batch with the safest emails.
+        highest_reach_csv_url:
+          type: string
+          description: A url to download a csv of the batch with the highest reach emails.
+        only_invalid_csv_url:
+          type: string
+          description: A url to download a csv of the batch with only invalid emails.
+        annotated_csv_url:
+          type: string
+          description: A url to download a csv of the batch with an extra column that has the email validation results.
 
   securitySchemes:
     truelist_auth:
@@ -226,12 +232,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/email'
-        "422":
-          description: Insufficient credits to process
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
         "401":
           description: User could not be found
           content:
@@ -289,12 +289,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/batch'
-        "422":
-          description: Insufficient credits to process batch
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
         "401":
           description: User could not be found
           content:
@@ -380,80 +374,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/batch'
-
-        "401":
-          description: User could not be found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-        "404":
-          description: Batch could not be found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-
-  /api/v1/batches/{uuid}/download:
-    get:
-      tags:
-        - Working with batches
-      summary: Download CSV of a batch with an extra column that has the email validation results
-      parameters:
-        - name: uuid
-          in: path
-          required: true
-          description: The UUID of the batch to get
-          schema:
-            type: string
-            format: uuid
-      security:
-        - truelist_auth: []
-      responses:
-        "200":
-          description: A successful response
-          content:
-            text/csv:
-              schema:
-                type: string
-                format: binary
-
-        "401":
-          description: User could not be found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-        "404":
-          description: Batch could not be found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-
-  /api/v1/batches/{uuid}/download_cleaned:
-    get:
-      tags:
-        - Working with batches
-      summary: Download CSV of a batch with the invalid emails removed
-      parameters:
-        - name: uuid
-          in: path
-          required: true
-          description: The UUID of the batch to get
-          schema:
-            type: string
-            format: uuid
-      security:
-        - truelist_auth: []
-      responses:
-        "200":
-          description: A successful response
-          content:
-            text/csv:
-              schema:
-                type: string
-                format: binary
 
         "401":
           description: User could not be found
