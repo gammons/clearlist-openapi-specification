@@ -246,7 +246,7 @@ paths:
       summary: Verify a list of emails
       description: "Upload a list of emails to verify.  You can either of the following (but not both):\n
         - a comma- or space-separated list via the `emails` parameter,\n
-        - A binary file upload via the `csv` parameter documented below.\n
+        - A binary file upload via the `file` parameter documented below.\n
 
         Note that batches are processed in the background.  To check on the status of a list, you have a couple of options:\n
         - Poll the status of your batch's progress by `GET`ing the batch you created by its uuid.\n
@@ -262,10 +262,10 @@ paths:
             schema:
               type: object
               properties:
-                csv:
+                file:
                   type: string
                   format: binary
-                  description: The CSV file to upload
+                  description: The CSV / XLSX file to upload
                 uuid:
                   type: string
                   format: uuid
