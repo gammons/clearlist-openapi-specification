@@ -22,7 +22,7 @@ tags:
   - name: Single email validation
     description: Endpoints used to validate a single email address.  Validation is faster but potentially less accurate.
   - name: Batch email validation
-    description: Endpoints used to validate multiple email addresses.  Validation can be slower but is the most accurate.
+    description: A Batch is a collection of email addresses that are uploaded to be validated.  Batches are processed in the background and can be checked on later.
   - name: Working with batches
     description: Endpoints used to validate multiple email addresses.  Validation can be slower but is the most accurate.
 
