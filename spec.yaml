@@ -221,7 +221,7 @@ paths:
           examples:
             one:
               summary: A space-separated list of emails
-              value: bob@example.com,jon@example.com,test@example.com
+              value: bob@example.com jon@example.com test@example.com
           schema:
             type: string
             format: email
