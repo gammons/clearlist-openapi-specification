@@ -387,6 +387,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+        "422":
+          description: Batch could not be deleted - only completed batches can be deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
 
   /me:
     get:
