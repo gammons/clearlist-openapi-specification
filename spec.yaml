@@ -11,7 +11,7 @@ info:
   contact:
     name: API Support
     email: hello@truelist.io
-  version: 0.0.1
+  version: 0.2.1
 
 servers:
 - url: https://api.truelist.io
@@ -20,11 +20,11 @@ tags:
   - name: Me
     description: Everything about the user that is using the api
   - name: Single email validation
-    description: Endpoints used to validate a single email address.  Validation is faster but potentially less accurate.
+    description: Endpoints used to validate a single email address.  Validation occurs within the request cycle.
   - name: Batch email validation
     description: A Batch is a collection of email addresses that are uploaded to be validated.  Batches are processed in the background and can be checked on later.
-  - name: Working with batches
-    description: Endpoints used to validate multiple email addresses.  Validation can be slower but is the most accurate.
+  - name: Retrieving results
+    description: Endpoints used to retrieve the results of a batch validation.
 
 components:
   schemas:
@@ -123,7 +123,12 @@ components:
             - failed_no_mailbox
             - failed_greylisted
             - failed_syntax_check
+            - unknown_error
           description: More details about the email's validation status.
+        verified_at:
+          type: date-time
+          format: email
+          description: The time the email was verified.  If the email already exists in your account and has been validated before, and the email has been checked within your revalidation period, the email will not be revalidated.
 
     batch:
       type: object
@@ -210,7 +215,10 @@ paths:
       tags:
         - Single email validation
       summary: Verify a single email address
-      description: Verify up to 10 email addresses.  Verification will happen inline during the api request.  Faster but potentially less accurate.
+      description: "Verify up to 3 email addresses.  Verification will happen inline during the api request. \n
+
+        **Note**: If email validation takes over 30 seconds, this request will time out.
+        "
       security:
         - truelist_auth: []
       parameters:
@@ -297,7 +305,7 @@ paths:
                 $ref: '#/components/schemas/error'
     get:
       tags:
-        - Working with batches
+        - Batch email validation
       summary: Retrieve all batches for your account.
       security:
         - truelist_auth: []
@@ -321,7 +329,7 @@ paths:
   /api/v1/batches/{uuid}:
     get:
       tags:
-        - Working with batches
+        - Batch email validation
       summary: Retrieve a single batch by its UUID.
       parameters:
         - name: uuid
@@ -355,7 +363,7 @@ paths:
                 $ref: '#/components/schemas/error'
     delete:
       tags:
-        - Batch validation
+        - Batch email validation
       summary: Delete a batch by its UUID.
       parameters:
         - name: uuid
@@ -420,3 +428,80 @@ paths:
                   error:
                     type: string
                     description: Gives information about what went wrong with the request.
+
+  /api/v1/email_addresses:
+    get:
+      tags:
+        - Retrieving results
+      summary: Retrieve email validation results
+      parameters:
+        - name: batch_uuid
+          in: path
+          required: false
+          description: The UUID of the batch to get emails from
+          schema:
+            type: string
+            format: uuid
+        - name: email_state
+          in: path
+          required: false
+          description: Get emails with a particular email_state
+          schema:
+            type: string
+            enum:
+              - ok
+              - risky
+              - invalid
+              - unknown
+        - name: email_sub_state
+          in: path
+          required: false
+          description: Get emails with a particular email_sub_state
+          schema:
+            type: string
+            enum:
+              - email_ok
+              - accept_all
+              - is_disposable
+              - is_role
+              - failed_mx_check
+              - failed_smtp_check
+              - failed_no_mailbox
+              - failed_greylisted
+              - failed_syntax_check
+        - name: email_address
+          in: path
+          required: false
+          description: Search for a particular email address
+          schema:
+            type: string
+            format: email
+        - name: page
+          in: path
+          required: false
+          description: The page number to retrieve.  If not specified, the first page will be returned.
+          schema:
+            type: integer
+        - name: per_page
+          in: path
+          required: false
+          description: The number of emails to return per page.  If not specified, 25 will be returned.  The maximum is 100.
+          schema:
+            type: integer
+
+      security:
+        - truelist_auth: []
+      responses:
+        "200":
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/batch'
+
+        "401":
+          description: User could not be found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
