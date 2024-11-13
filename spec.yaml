@@ -85,6 +85,22 @@ components:
           items:
             $ref: '#/components/schemas/api_key'
 
+    email_addresses:
+      type: object
+      properties:
+        email_addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/email'
+
+    verify_inline:
+      type: object
+      properties:
+        emails:
+          type: array
+          items:
+            $ref: '#/components/schemas/email'
+
     email:
       type: object
       properties:
@@ -128,6 +144,7 @@ components:
         verified_at:
           type: date-time
           format: email
+          example: 2021-01-01T00:00:00Z
           description: The time the email was verified.  If the email already exists in your account and has been validated before, and the email has been checked within your revalidation period, the email will not be revalidated.
 
     batch:
@@ -239,7 +256,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/email'
+                $ref: '#/components/schemas/verify_inline'
         "401":
           description: User could not be found
           content:
@@ -497,7 +514,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/batch'
+                $ref: '#/components/schemas/email_addresses'
 
         "401":
           description: User could not be found
