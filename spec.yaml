@@ -270,7 +270,7 @@ paths:
         - Batch email validation
       summary: Verify a list of emails
       description: "Upload a list of emails to verify.  You can either of the following (but not both):\n
-        - a comma- or space-separated list via the `emails` parameter,\n
+        - A `data` parameter that represents a json array of email data.  Should be in the format of `[['email@email.com'], ['email2@email.com']]`.  Each row can contain arbitrary data which will be returned in the annotated csv result file, but one element in the row array must be an email address. Needs at least 2 rows of data to be valid.\n
         - A binary file upload via the `file` parameter documented below.\n
 
         Note that batches are processed in the background.  To check on the status of a list, you have a couple of options:\n
@@ -299,9 +299,12 @@ paths:
             schema:
               type: object
               properties:
-                emails:
+                data:
+                  type: object
+                  description: JSON object of email data.  Should be in the format of `[['email@email.com'], ['email2@email.com']]`.  Each row can contain arbitrary data which will be returned in the annotated csv result file, but one element in the row array must be an email address. Needs at least 2 rows of data to be valid.
+                filename:
                   type: string
-                  description: a comma or space separated list of email addresses to validate
+                  description: The name of the json file.  It will be used as the batch name, as well as the basis for the annotated, safest bet, highest reach, and only invalid csv files.
                 uuid:
                   type: string
                   format: uuid
