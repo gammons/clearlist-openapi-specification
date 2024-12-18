@@ -269,6 +269,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+        "429":
+          description: Rate limit exceeded - you've hit the rate limit for this endpoint.  Your rate limit is dctated by your plan.  Please wait a bit and try again.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
 
   /api/v1/batches:
     post:
