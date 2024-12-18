@@ -263,6 +263,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+        "408":
+          description: Request timed out - communication with the SMTP server took too long.  Your code logic should handle this error and retry the request later.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
 
   /api/v1/batches:
     post:
