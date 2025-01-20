@@ -288,6 +288,8 @@ paths:
         Note that batches are processed in the background.  To check on the status of a list, you have a couple of options:\n
         - Poll the status of your batch's progress by `GET`ing the batch you created by its uuid.\n
         - Supply a `webhook_url` when creating the batch.  TrueList will call the url you supplied when the batch is completed.  When we call your url, we'll supply a `batch_id` parameter, as well as an `X-Batch-Id` header that includes the batch id that has completed.
+
+        Also note that counts are not updated until the batch is completed.
           "
       security:
         - truelist_auth: []
