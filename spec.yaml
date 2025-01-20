@@ -282,7 +282,7 @@ paths:
         - Batch email validation
       summary: Verify a list of emails
       description: "Upload a list of emails to verify.  You can either of the following (but not both):\n
-        - A `data` parameter that represents a json array of email data.  Should be in the format of `[['email@email.com'], ['email2@email.com']]`.  Each row can contain arbitrary data which will be returned in the annotated csv result file, but one element in the row array must be an email address. Needs at least 2 rows of data to be valid.\n
+        - A `data` parameter that represents a json array of email data.  Should be in the format of `[['email@email.com'], ['email2@email.com']]`.  Each row can also contain arbitrary data, which is useful for supplying external ids or other identifying information.  This data will be returned in the annotated csv result files.  However, one element in the row array must be an email address.  Needs at least 2 rows of data to be valid.\n
         - A binary file upload via the `file` parameter documented below.\n
 
         Note that batches are processed in the background.  To check on the status of a list, you have a couple of options:\n
