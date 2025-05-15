@@ -1,8 +1,8 @@
 openapi: 3.0.0
 info:
-  title: TrueList.io API documentation
+  title: Truelist.io API documentation
   description: >
-    Welcome to TrueList's api!  To get started, <a href='https://app.truelist.io/settings/api-keys'>generate an api key</a>. You'll use the API key in an `Authorization` header in every request.
+    Welcome to Truelist's api!  To get started, <a href='https://app.truelist.io/settings/api-keys'>generate an api key</a>. You'll use the API key in an `Authorization` header in every request.
     <br />
     <br />
 
@@ -287,7 +287,7 @@ paths:
 
         Note that batches are processed in the background.  To check on the status of a list, you have a couple of options:\n
         - Poll the status of your batch's progress by `GET`ing the batch you created by its uuid.\n
-        - Supply a `webhook_url` when creating the batch.  TrueList will makd a POST request to the url you supplied when the batch is completed.  When we call your url, we'll supply the `batch_id` in the body of the request.
+        - Supply a `webhook_url` when creating the batch.  Truelist will makd a POST request to the url you supplied when the batch is completed.  When we call your url, we'll supply the `batch_id` in the body of the request.
 
         Also note that counts are not updated until the batch is completed.
           "
@@ -309,6 +309,9 @@ paths:
                   type: string
                   format: uuid
                   description: Supply a UUID if you want the batch to have this UUID.  Otherwise, a random UUID will be generated.
+                webhook_url:
+                  type: string
+                  description: Supply a webhook_url when creating a batch.  Truelist will call the url when the batch has completed.
           application/x-www-form-urlencoded:
             schema:
               type: object
@@ -323,6 +326,9 @@ paths:
                   type: string
                   format: uuid
                   description: Supply a UUID if you want the batch to have this UUID.  Otherwise, a random UUID will be generated.
+                webhook_url:
+                  type: string
+                  description: Supply a webhook_url when creating a batch.  Truelist will call the url when the batch has completed.
 
       responses:
         "200":
