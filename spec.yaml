@@ -311,6 +311,12 @@ paths:
                 webhook_url:
                   type: string
                   description: Supply a webhook_url when creating a batch.  Truelist will call the url when the batch has completed.
+                validation_strategy:
+                  type: string
+                  enum:
+                    - accurate
+                    - fast
+                  description: The validation strategy to use for the batch.  Defaults to `accurate`.  Using `fast` will skip our internal backoff/retry logic and deeper validation strategy checks.  This is useful for when you want to validate a large number of emails quickly, but it may result in more false positives.
           application/x-www-form-urlencoded:
             schema:
               type: object
@@ -328,6 +334,12 @@ paths:
                 webhook_url:
                   type: string
                   description: Supply a webhook_url when creating a batch.  Truelist will call the url when the batch has completed.
+                validation_strategy:
+                  type: string
+                  enum:
+                    - accurate
+                    - fast
+                  description: The validation strategy to use for the batch.  Defaults to `accurate`.  Using `fast` will skip our internal backoff/retry logic and deeper validation strategy checks.  This is useful for when you want to validate a large number of emails quickly, but it may result in more false positives.
 
       responses:
         "200":
